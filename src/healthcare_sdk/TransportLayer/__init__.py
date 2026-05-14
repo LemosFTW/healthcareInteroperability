@@ -1,6 +1,6 @@
-"""Transport layer package."""
+"""Transport layer package exports."""
 
-from .restController import RestController
 from .adapter import Adapter
+from .restController import RestController
 
-__all__ = ["RestController", "Adapter"]
+__all__ = ["Adapter", "RestController"]

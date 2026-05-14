@@ -13,5 +13,13 @@ class RestController(Adapter):
     def health_check():
         return {"status": "ok"}
     
+    # @app.get("/listMensages")
+    # def list_messages():
+    #     return {"messages": []}
+    
+    # @app.post("/processMessage")
+    # def process_message(json: dict):
+    #     return {"status": "Message received", "message": json}
+    
     def executeServer(self, port : int = 8000):
         uvicorn.run(app, port=port)

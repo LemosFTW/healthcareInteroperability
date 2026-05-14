@@ -1,8 +1,8 @@
-from .TransportLayer.restController import RestController
+from .transportLayer import RestController
 
 def main():
-    app = RestController(port=8000)
-    app.executeServer()
+    app = RestController()
+    app.executeServer(port=8000)
 
 if __name__ == "__main__":
     main()
