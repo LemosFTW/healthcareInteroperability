@@ -57,6 +57,99 @@ python -m healthcare_sdk.app
 
 Then open: http://127.0.0.1:8000/health
 
+## SDK Contracts
+
+This document defines the generic envelope and component contracts for the SDK framework.
+
+### Envelope
+
+The framework standardizes a generic envelope that can carry HL7v2, FHIR, or other protocols.
+
+```text
+MessageEnvelope
+  id: str
+  protocol: str
+  message_type: str
+  raw_payload: str | bytes
+  decoded_payload: dict | None
+  normalized_payload: dict | None
+  metadata: dict
+  errors: list[ErrorDetail]
+  status: str
+```
+
+#### Status values
+
+- received
+- decoded
+- validated
+- normalized
+- stored
+- error
+
+### Types
+
+```text
+RawMessage
+  id: str
+  protocol: str
+  raw_payload: str | bytes
+  metadata: dict
+  message_type: str | None
+
+ErrorDetail
+  code: str
+  message: str
+  stage: str
+  context: dict | None
+
+ValidationResult
+  is_valid: bool
+  errors: list[ErrorDetail]
+```
+
+### Component contracts
+
+```text
+Adapter
+  executeServer(port=8000)
+  receive() -> RawMessage
+
+Decoder
+  decode(raw_message: RawMessage) -> DecodedPayload
+
+Validator
+  validate(decoded_payload: DecodedPayload) -> ValidationResult
+
+Normalizer
+  normalizeData(decoded_payload: DecodedPayload) -> NormalizedPayload
+
+Usecase
+  execute(raw_message: RawMessage) -> MessageEnvelope
+
+Storage
+  save(envelope: MessageEnvelope) -> str
+  connection() -> Any
+  read(query: dict) -> dict
+  delete(query: dict) -> bool
+  update(query: dict, data: dict) -> bool
+```
+
+### Errors
+
+```text
+SdkError
+  code: str
+  message: str
+  stage: str
+  context: dict
+
+DecodeError
+ValidationError
+NormalizationError
+StorageError
+```
+
 ## Hl7 v2 examples
 
 ALl the examples were taken of this repository
