@@ -57,6 +57,31 @@ python -m healthcare_sdk.app
 
 Then open: http://127.0.0.1:8000/health
 
+## Install
+
+```powershell
+pip install -e .
+```
+
+## SDK Entry Point
+
+The framework provides a registration helper to import arrays of components that
+implement the SDK Protocols.
+
+```python
+from healthcare_sdk import register_components
+
+components = register_components(
+    adapters=[...],
+    usecases=[...],
+    validators=[...],
+    decoders=[...],
+    normalizers=[...],
+    aihelpers=[...],
+    storages=[...],
+)
+```
+
 ## SDK Contracts
 
 This document defines the generic envelope and component contracts for the SDK framework.

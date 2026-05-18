@@ -12,6 +12,7 @@ from .contracts import (
     ValidationResult,
 )
 from .errors import DecodeError, NormalizationError, SdkError, StorageError, ValidationError
+from .sdk import ComponentRegistrationError, SdkComponents, register_components
 from .transportLayer import Adapter, RestController
 from .repositories import HealthCareStorage, PostgreSqlStorage
 from .usecases import HealthCareUsecase
@@ -38,6 +39,9 @@ __all__ = [
 	"STATUS_NORMALIZED",
 	"STATUS_STORED",
 	"STATUS_ERROR",
+	"SdkComponents",
+	"ComponentRegistrationError",
+	"register_components",
 	"SdkError",
 	"DecodeError",
 	"ValidationError",
