@@ -1,7 +1,8 @@
-from typing import Any, Dict, Protocol
+from typing import Any, Dict, Protocol, runtime_checkable
 
 from ..contracts import MessageEnvelope
 
+@runtime_checkable
 class HealthCareStorage(Protocol):
     """Defines the default behavior for a storage repository"""
     def save(self, envelope: MessageEnvelope) -> str:

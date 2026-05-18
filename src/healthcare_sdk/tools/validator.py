@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from ..contracts import DecodedPayload, ValidationResult
 
+@runtime_checkable
 class Validator(Protocol):
     """Defines the default behavior for a validator"""
     def validate(self, decoded_payload: DecodedPayload) -> ValidationResult:
