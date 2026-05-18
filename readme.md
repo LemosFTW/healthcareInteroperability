@@ -56,3 +56,15 @@ python -m healthcare_sdk.app
 ```
 
 Then open: http://127.0.0.1:8000/health
+
+## Hl7 v2 examples
+
+ALl the examples were taken of this repository
+```
+https://github.com/Work-In-Progress-For-Health/hl7-v2-examples
+```
+## TO DO
+
+- Definir tipo de entidades a se armazenar
+- ORM?
+- setup postgreSql to test
