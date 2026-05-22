@@ -13,6 +13,18 @@ class RestController(Adapter):
     def health_check():
         return {"status": "ok"}
     
+    def add_endpoint(self, path: str, method: str, handler):
+        if method.lower() == "get":
+            app.get(path)(handler)
+        elif method.lower() == "post":
+            app.post(path)(handler)
+        elif method.lower() == "put":
+            app.put(path)(handler)
+        elif method.lower() == "delete":
+            app.delete(path)(handler)
+        else:
+            raise ValueError(f"Unsupported HTTP method: {method}")
+    
     # @app.get("/listMensages")
     # def list_messages():
     #     return {"messages": []}
