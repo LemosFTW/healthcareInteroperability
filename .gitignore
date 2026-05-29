@@ -6,3 +6,6 @@ examples/
 *.egg-info/
 dist/
 build/
+.claude/
+_bmad/
+_bmad-output/
