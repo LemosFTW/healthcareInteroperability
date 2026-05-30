@@ -9,3 +9,6 @@ build/
 .claude/
 _bmad/
 _bmad-output/
+.ralph/
+CLAUDE.md
+bmalph
