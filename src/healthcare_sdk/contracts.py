@@ -43,6 +43,16 @@ class MessageEnvelope:
     errors: List[ErrorDetail] = field(default_factory=list)
     status: str = STATUS_RECEIVED
 
+    @classmethod
+    def from_raw_message(cls, raw_message: "RawMessage") -> "MessageEnvelope":
+        return cls(
+            id=raw_message.id,
+            protocol=raw_message.protocol,
+            message_type=raw_message.message_type or "",
+            raw_payload=raw_message.raw_payload,
+            metadata=dict(raw_message.metadata),
+        )
+
 
 @dataclass
 class ValidationResult:
