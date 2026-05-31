@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session
 # ---------------------------------------------------------------------------
 # AC1: Base importável de healthcare_sdk.repositories — usado para entidade customizada
 # ---------------------------------------------------------------------------
-@pytest.mark.skip(reason="TODO: implement Base")
 @pytest.mark.p0
 def test_base_is_importable_from_repositories():
     """
@@ -46,7 +45,6 @@ def test_base_is_importable_from_repositories():
 # ---------------------------------------------------------------------------
 # AC2: MessageLog tem os campos corretos e tabela é criada no SQLite in-memory
 # ---------------------------------------------------------------------------
-@pytest.mark.skip(reason="TODO: implement messagelog and Base")
 @pytest.mark.p0
 def test_message_log_table_created_with_all_required_fields():
     """
@@ -76,7 +74,6 @@ def test_message_log_table_created_with_all_required_fields():
 # ---------------------------------------------------------------------------
 # AC3: MessageEnvelope processado pode ser persistido no MessageLog
 # ---------------------------------------------------------------------------
-@pytest.mark.skip(reason="TODO: implement messagelog and Base")
 @pytest.mark.p0
 def test_message_envelope_data_persisted_in_message_log():
     """
