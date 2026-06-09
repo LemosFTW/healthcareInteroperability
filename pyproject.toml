@@ -14,6 +14,8 @@ dependencies = [
     "psycopg2>=2.9.0",
     "pytest>=9.0.3",
     "httpx>=0.24.0",
+    "sqlalchemy>=2.0.0",
+    "testcontainers[postgres]>=4.0.0",
 ]
 
 [tool.setuptools]
@@ -21,6 +23,47 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.importlinter]
+root_packages = ["healthcare_sdk"]
+
+[[tool.importlinter.contracts]]
+name = "Contracts layer has no intra-SDK dependencies"
+type = "forbidden"
+source_modules = ["healthcare_sdk.contracts"]
+forbidden_modules = [
+    "healthcare_sdk.tools",
+    "healthcare_sdk.usecases",
+    "healthcare_sdk.repositories",
+    "healthcare_sdk.transportLayer",
+]
+
+[[tool.importlinter.contracts]]
+name = "Tools layer cannot import from outer layers"
+type = "forbidden"
+source_modules = ["healthcare_sdk.tools"]
+forbidden_modules = [
+    "healthcare_sdk.usecases",
+    "healthcare_sdk.repositories",
+    "healthcare_sdk.transportLayer",
+]
+
+[[tool.importlinter.contracts]]
+name = "Usecases layer cannot import from Repositories or Transport"
+type = "forbidden"
+source_modules = ["healthcare_sdk.usecases"]
+forbidden_modules = [
+    "healthcare_sdk.repositories",
+    "healthcare_sdk.transportLayer",
+]
+
+[[tool.importlinter.contracts]]
+name = "Transport layer cannot import from Repositories"
+type = "forbidden"
+source_modules = ["healthcare_sdk.transportLayer"]
+forbidden_modules = [
+    "healthcare_sdk.repositories",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
