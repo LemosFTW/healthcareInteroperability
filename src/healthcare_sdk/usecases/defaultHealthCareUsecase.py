@@ -8,10 +8,12 @@ from ..contracts import (
     STATUS_STORED,
     STATUS_VALIDATED,
 )
-from ..errors import DecodeError, NormalizationError, SdkError, StorageError, ValidationError
+from ..errors import  SdkError
+from .healthCareUsecase import HealthCareUsecase
+from ..tools import Decoder, NormalizerTemplate, ValidatorTemplate
 
 
-class DefaultHealthCareUsecase:
+class DefaultHealthCareUsecase(HealthCareUsecase):
     """Built-in orchestrator that runs the decode→validate→normalize→store pipeline.
 
     Each stage is wrapped in error handling: SdkError subclasses are caught and
@@ -19,7 +21,7 @@ class DefaultHealthCareUsecase:
     and returns the envelope with status="error" instead of propagating exceptions.
     """
 
-    def __init__(self, decoder, validator, normalizer, storage):
+    def __init__(self, decoder : Decoder, validator : ValidatorTemplate, normalizer : NormalizerTemplate, storage) -> None:
         self.decoder = decoder
         self.validator = validator
         self.normalizer = normalizer
@@ -28,20 +30,30 @@ class DefaultHealthCareUsecase:
     def execute(self, raw_message: RawMessage) -> MessageEnvelope:
         envelope = MessageEnvelope.from_raw_message(raw_message)
 
-        # --- Decode ---
+        if self._decode(raw_message, envelope) is None:
+            return envelope
+        if self._validate(envelope) is None:
+            return envelope
+        if self._normalize(envelope) is None:
+            return envelope
+        if self._store(envelope) is None:
+            return envelope
+
+        return envelope
+
+    def _decode(self, raw_message: RawMessage, envelope: MessageEnvelope) -> MessageEnvelope | None:
         try:
             envelope.decoded_payload = self.decoder.decode(raw_message)
             envelope.status = STATUS_DECODED
+            return envelope
         except SdkError as exc:
             envelope.errors.append(ErrorDetail(code=exc.code, message=exc.message, stage=exc.stage, context=exc.context))
-            envelope.status = STATUS_ERROR
-            return envelope
         except Exception as exc:
             envelope.errors.append(ErrorDetail(code="decode_error", message=str(exc), stage="decode"))
-            envelope.status = STATUS_ERROR
-            return envelope
+        envelope.status = STATUS_ERROR
+        return None
 
-        # --- Validate ---
+    def _validate(self, envelope: MessageEnvelope) -> MessageEnvelope | None:
         try:
             validation_result = self.validator.validate(envelope.decoded_payload)
             if not validation_result.is_valid:
@@ -50,41 +62,36 @@ class DefaultHealthCareUsecase:
                 if not validation_result.errors:
                     envelope.errors.append(ErrorDetail(code="validation_error", message="Validation failed", stage="validate"))
                 envelope.status = STATUS_ERROR
-                return envelope
+                return None
             envelope.status = STATUS_VALIDATED
+            return envelope
         except SdkError as exc:
             envelope.errors.append(ErrorDetail(code=exc.code, message=exc.message, stage=exc.stage, context=exc.context))
-            envelope.status = STATUS_ERROR
-            return envelope
         except Exception as exc:
             envelope.errors.append(ErrorDetail(code="validation_error", message=str(exc), stage="validate"))
-            envelope.status = STATUS_ERROR
-            return envelope
+        envelope.status = STATUS_ERROR
+        return None
 
-        # --- Normalize ---
+    def _normalize(self, envelope: MessageEnvelope) -> MessageEnvelope | None:
         try:
             envelope.normalized_payload = self.normalizer.normalizeData(envelope.decoded_payload)
             envelope.status = STATUS_NORMALIZED
+            return envelope
         except SdkError as exc:
             envelope.errors.append(ErrorDetail(code=exc.code, message=exc.message, stage=exc.stage, context=exc.context))
-            envelope.status = STATUS_ERROR
-            return envelope
         except Exception as exc:
             envelope.errors.append(ErrorDetail(code="normalization_error", message=str(exc), stage="normalize"))
-            envelope.status = STATUS_ERROR
-            return envelope
+        envelope.status = STATUS_ERROR
+        return None
 
-        # --- Store ---
+    def _store(self, envelope: MessageEnvelope) -> MessageEnvelope | None:
         try:
             self.storage.save(envelope)
             envelope.status = STATUS_STORED
+            return envelope
         except SdkError as exc:
             envelope.errors.append(ErrorDetail(code=exc.code, message=exc.message, stage=exc.stage, context=exc.context))
-            envelope.status = STATUS_ERROR
-            return envelope
         except Exception as exc:
             envelope.errors.append(ErrorDetail(code="storage_error", message=str(exc), stage="store"))
-            envelope.status = STATUS_ERROR
-            return envelope
-
-        return envelope
+        envelope.status = STATUS_ERROR
+        return None
