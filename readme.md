@@ -11,15 +11,21 @@ src/
 └─ healthcare_sdk/
    ├─ app.py
    ├─ __init__.py
+   ├─ contracts.py
+   ├─ errors.py
+   ├─ sdk.py
    ├─ transportLayer/
    │  ├─ adapter.py
    │  ├─ restController.py
    │  └─ __init__.py
    ├─ repositories/
+   │  ├─ base.py
+   │  ├─ messageLog.py
    │  ├─ postgreSqlStorage.py
    │  ├─ storage.py
    │  └─ __init__.py
    ├─ usecases/
+   │  ├─ defaultHealthCareUsecase.py
    │  ├─ healthCareUsecase.py
    │  └─ __init__.py
    └─ tools/
@@ -36,10 +42,13 @@ src/
 
 Folder responsibilities:
 
-- transportLayer/: Transport adapters and server launchers (e.g., REST, HL7 over MLLP). 
-- repositories/: Database providers and external data sources used by implementations.
-- usecases/: Application use cases and orchestration logic.
-- tools/: Shared helpers for decoding, validation, and normalization.
+- `contracts.py`: Shared data types (`RawMessage`, `MessageEnvelope`, `ValidationResult`, status constants).
+- `errors.py`: SDK exception hierarchy (`SdkError`, `DecodeError`, `ValidationError`, `NormalizationError`, `StorageError`).
+- `sdk.py`: `register_components` helper and `SdkComponents` dataclass.
+- `transportLayer/`: Transport adapters and server launchers (e.g., REST, HL7 over MLLP).
+- `repositories/`: Database providers and external data sources. Includes `base.py` (SQLAlchemy declarative base) and `messageLog.py` (ORM model for persisted envelopes).
+- `usecases/`: Application use cases and orchestration logic. `defaultHealthCareUsecase.py` provides the built-in decode→validate→normalize→store pipeline.
+- `tools/`: Shared helpers for decoding, validation, and normalization.
 
 ## Setup (uv)
 
@@ -69,9 +78,9 @@ The framework provides a registration helper to import arrays of components that
 implement the SDK Protocols.
 
 ```python
-from healthcare_sdk import register_components
+from healthcare_sdk import register_components, SdkComponents
 
-components = register_components(
+components: SdkComponents = register_components(
     adapters=[...],
     usecases=[...],
     validators=[...],
@@ -146,13 +155,22 @@ Decoder
 Validator
   validate(decoded_payload: DecodedPayload) -> ValidationResult
 
+ValidatorTemplate (ABC + Validator)
+  validate(decoded_payload: DecodedPayload) -> ValidationResult  # abstract
+
 Normalizer
   normalizeData(decoded_payload: DecodedPayload) -> NormalizedPayload
 
-Usecase
+NormalizerTemplate (ABC + Normalizer)
+  normalizeData(decoded_payload: DecodedPayload) -> NormalizedPayload  # abstract
+
+AiHelper
+  generateResponse(prompt: str) -> str
+
+HealthCareUsecase
   execute(raw_message: RawMessage) -> MessageEnvelope
 
-Storage
+HealthCareStorage
   save(envelope: MessageEnvelope) -> str
   connection() -> Any
   read(query: dict) -> dict
@@ -181,8 +199,3 @@ ALl the examples were taken of this repository
 ```
 https://github.com/Work-In-Progress-For-Health/hl7-v2-examples
 ```
-## TO DO
-
-- Definir tipo de entidades a se armazenar
-- ORM?
-- setup postgreSql to test
